@@ -1,88 +1,63 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { BookmarkPlus } from "lucide-react";
 import api from "../../utils/api";
+import QuoteCard from "../../components/QuoteCard";
+import QuoteFilterBar from "../../components/QuoteFilterBar";
+import { staggerContainer } from "../../components/Motion";
 
-function QuoteCard({ quote, isOwned, onDelete, onUnsave }) {
-  const [busy, setBusy] = useState(false);
+function applyFilters(list, search, activeTag, sort) {
+  const q = search.trim().toLowerCase();
+  let filtered = list.filter((quote) => {
+    if (activeTag && !quote.tags?.includes(activeTag)) return false;
+    if (!q) return true;
+    return (
+      quote.text?.toLowerCase().includes(q) ||
+      quote.author?.toLowerCase().includes(q) ||
+      quote.tags?.some((t) => t.toLowerCase().includes(q))
+    );
+  });
 
-  async function handleDelete() {
-    setBusy(true);
-    try {
-      await onDelete(quote._id);
-    } finally {
-      setBusy(false);
-    }
+  filtered = [...filtered];
+  if (sort === "recent") {
+    filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  } else if (sort === "oldest") {
+    filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  } else if (sort === "az") {
+    filtered.sort((a, b) =>
+      (a.author || "").localeCompare(b.author || "")
+    );
   }
-
-  async function handleUnsave() {
-    setBusy(true);
-    try {
-      await onUnsave(quote._id);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
-      <p className="text-gray-800 leading-relaxed text-sm mb-3">
-        "{quote.text}"
-      </p>
-
-      <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div className="flex items-center gap-2 flex-wrap">
-          {quote.author && (
-            <span className="text-xs text-gray-400">— {quote.author}</span>
-          )}
-          {quote.tags?.map((tag) => (
-            <span
-              key={tag}
-              className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full"
-            >
-              #{tag}
-            </span>
-          ))}
-        </div>
-
-        {isOwned ? (
-          <button
-            onClick={handleDelete}
-            disabled={busy}
-            className="text-xs text-red-400 hover:text-red-600 transition-colors disabled:opacity-50"
-          >
-            Delete
-          </button>
-        ) : (
-          <button
-            onClick={handleUnsave}
-            disabled={busy}
-            className="text-xs text-gray-400 hover:text-gray-700 transition-colors disabled:opacity-50"
-          >
-            Unsave
-          </button>
-        )}
-      </div>
-    </div>
-  );
+  return filtered;
 }
 
-function Section({ title, quotes, isOwned, onDelete, onUnsave }) {
+function Section({ title, count, quotes, variant, onAction }) {
   if (quotes.length === 0) return null;
   return (
-    <div className="mb-10">
-      <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">
+    <div className="mb-12">
+      <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-[0.2em] mb-5">
         {title}
+        <span className="text-gray-300 ml-2 normal-case tracking-normal">
+          · {count}
+        </span>
       </h3>
-      <div className="space-y-4">
-        {quotes.map((q) => (
-          <QuoteCard
-            key={q._id}
-            quote={q}
-            isOwned={isOwned}
-            onDelete={onDelete}
-            onUnsave={onUnsave}
-          />
-        ))}
-      </div>
+      <motion.div
+        variants={staggerContainer}
+        initial="hidden"
+        animate="show"
+        className="columns-1 md:columns-2 lg:columns-3 gap-4"
+      >
+        <AnimatePresence>
+          {quotes.map((q) => (
+            <QuoteCard
+              key={q._id}
+              quote={q}
+              variant={variant}
+              onAction={onAction}
+            />
+          ))}
+        </AnimatePresence>
+      </motion.div>
     </div>
   );
 }
@@ -92,16 +67,41 @@ export default function YourQuotes() {
   const [saved, setSaved] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [search, setSearch] = useState("");
+  const [activeTag, setActiveTag] = useState(null);
+  const [sort, setSort] = useState("recent");
+
   useEffect(() => {
     Promise.all([api.get("/quotes/mine"), api.get("/quotes/saved")])
       .then(([mineRes, savedRes]) => {
         setMine(mineRes.data);
-        // exclude quotes the user also created (no duplicates)
         const mineIds = new Set(mineRes.data.map((q) => q._id));
         setSaved(savedRes.data.filter((q) => !mineIds.has(q._id)));
       })
       .finally(() => setLoading(false));
   }, []);
+
+  // Union of all tags across both lists, for the filter chips
+  const allTags = useMemo(() => {
+    const set = new Set();
+    [...mine, ...saved].forEach((q) =>
+      q.tags?.forEach((t) => set.add(t))
+    );
+    return [...set].sort();
+  }, [mine, saved]);
+
+  const filteredMine = useMemo(
+    () => applyFilters(mine, search, activeTag, sort),
+    [mine, search, activeTag, sort]
+  );
+  const filteredSaved = useMemo(
+    () => applyFilters(saved, search, activeTag, sort),
+    [saved, search, activeTag, sort]
+  );
+
+  function toggleTag(tag) {
+    setActiveTag((prev) => (prev === tag ? null : tag));
+  }
 
   async function handleDelete(id) {
     await api.delete(`/quotes/${id}`);
@@ -119,38 +119,66 @@ export default function YourQuotes() {
     );
   }
 
-  const empty = mine.length === 0 && saved.length === 0;
+  const totalCount = mine.length + saved.length;
+  const empty = totalCount === 0;
+  const noMatches =
+    !empty && filteredMine.length === 0 && filteredSaved.length === 0;
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-10">
-      <h2 className="text-2xl font-bold text-gray-900 mb-1">Your Quotes</h2>
-      <p className="text-gray-400 text-sm mb-8">
-        Quotes you've created and saved.
-      </p>
+    <div className="max-w-6xl mx-auto px-6 py-10">
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold text-gray-900 mb-1">Your Quotes</h2>
+        <p className="text-gray-400 text-sm">
+          Your collection — written and saved.
+          {!empty && (
+            <span className="text-gray-300 ml-2">· {totalCount} total</span>
+          )}
+        </p>
+      </div>
 
       {empty ? (
-        <div className="text-center py-20">
-          <span className="text-5xl mb-4 block">🔖</span>
-          <p className="text-gray-400 text-sm">
+        <div className="text-center py-24">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-500 mb-4">
+            <BookmarkPlus size={26} />
+          </div>
+          <p className="text-gray-500 text-sm">
             Nothing here yet. Create a quote or save one from Explorer.
           </p>
         </div>
       ) : (
         <>
-          <Section
-            title="Created by you"
-            quotes={mine}
-            isOwned
-            onDelete={handleDelete}
-            onUnsave={handleUnsave}
+          <QuoteFilterBar
+            search={search}
+            onSearchChange={setSearch}
+            tags={allTags}
+            activeTag={activeTag}
+            onTagToggle={toggleTag}
+            sort={sort}
+            onSortChange={setSort}
           />
-          <Section
-            title="Saved from Explorer"
-            quotes={saved}
-            isOwned={false}
-            onDelete={handleDelete}
-            onUnsave={handleUnsave}
-          />
+
+          {noMatches ? (
+            <div className="text-center py-16 text-gray-400 text-sm">
+              No quotes match your filters.
+            </div>
+          ) : (
+            <>
+              <Section
+                title="Created by you"
+                count={filteredMine.length}
+                quotes={filteredMine}
+                variant="owned"
+                onAction={handleDelete}
+              />
+              <Section
+                title="Saved from Explorer"
+                count={filteredSaved.length}
+                quotes={filteredSaved}
+                variant="saved"
+                onAction={handleUnsave}
+              />
+            </>
+          )}
         </>
       )}
     </div>

@@ -8,6 +8,14 @@ import {
   useMotionValue,
   useSpring,
 } from "framer-motion";
+import {
+  Compass,
+  Bookmark,
+  Share2,
+  Library,
+  PenLine,
+  Users,
+} from "lucide-react";
 import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 
@@ -448,7 +456,7 @@ function Hero() {
         >
           <Link
             to="/login"
-            className="px-4 py-2 text-sm font-medium text-white/90 hover:text-white transition-colors"
+            className="px-4 py-2 text-sm font-medium text-white border border-white/50 rounded-lg hover:bg-white/10 hover:border-white transition-all"
           >
             Log in
           </Link>
@@ -528,7 +536,7 @@ function Hero() {
 const FEATURE_DETAILS = {
   find: {
     title: "Find quotes you love",
-    icon: "🔍",
+    icon: Compass,
     description:
       "Browse the Explorer to discover quotes from every genre — philosophy, motivation, literature, and more. Filter by keyword, tag, or author to find exactly what resonates with you.",
     steps: [
@@ -539,7 +547,7 @@ const FEATURE_DETAILS = {
   },
   save: {
     title: "Save to your collection",
-    icon: "🔖",
+    icon: Bookmark,
     description:
       'Bookmark any quote you find in the Explorer. Your saved quotes live in the "Your Quotes" tab so you can revisit them anytime — organized and always at hand.',
     steps: [
@@ -550,7 +558,7 @@ const FEATURE_DETAILS = {
   },
   share: {
     title: "Share with friends",
-    icon: "✨",
+    icon: Share2,
     description:
       "Create your own quotes and publish them for the community. Add friends by username, send messages, and build a network around the words that matter to you.",
     steps: [
@@ -631,6 +639,7 @@ function DashboardMockup() {
 // ── Feature detail modal ────────────────────────────────────────────────────
 function FeatureModal({ feature, onClose }) {
   const detail = FEATURE_DETAILS[feature];
+  const Icon = detail.icon;
 
   return (
     <div
@@ -642,7 +651,9 @@ function FeatureModal({ feature, onClose }) {
         className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-8"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="text-4xl mb-4">{detail.icon}</div>
+        <div className="mb-4 text-gray-900">
+          <Icon size={32} />
+        </div>
         <h3 className="text-2xl font-bold mb-3">{detail.title}</h3>
         <p className="text-gray-500 text-sm leading-relaxed mb-6">
           {detail.description}
@@ -670,13 +681,16 @@ function FeatureModal({ feature, onClose }) {
 
 // ── Feature step card ───────────────────────────────────────────────────────
 function FeatureStep({ id, icon, title, description, onClick, isLast }) {
+  const Icon = icon;
   return (
     <div className="flex flex-col md:flex-row items-center gap-4 md:gap-0">
       <button
         onClick={() => onClick(id)}
         className="group flex flex-col items-center text-center bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-gray-200 transition-all w-full md:w-64"
       >
-        <span className="text-3xl mb-3">{icon}</span>
+        <div className="mb-3 text-gray-900">
+          <Icon size={28} />
+        </div>
         <h3 className="font-semibold text-gray-900 mb-1">{title}</h3>
         <p className="text-xs text-gray-400 leading-relaxed">{description}</p>
         <span className="mt-4 text-xs text-black underline underline-offset-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -1052,33 +1066,35 @@ export default function Home() {
           >
             {[
               {
-                icon: "📚",
+                icon: Library,
                 title: "Your personal library",
                 body: "Every quote you save lives in one place — searchable, organized, and always with you.",
               },
               {
-                icon: "🔭",
+                icon: Compass,
                 title: "Discover without the noise",
                 body: "Search by keyword, tag, or author. No feeds, no ads — just the quotes.",
               },
               {
-                icon: "✍️",
+                icon: PenLine,
                 title: "Publish your own",
                 body: "Write, tag, and share the quotes that matter to you. Build a following around the words you choose.",
               },
               {
-                icon: "🤝",
+                icon: Users,
                 title: "Connect with friends",
                 body: "Add friends by username, trade favorites, and chat about the lines that moved you both.",
               },
-            ].map((b) => (
+            ].map((b) => {
+              const Icon = b.icon;
+              return (
               <motion.div
                 key={b.title}
                 variants={staggerItem}
                 className="flex gap-4"
               >
-                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gray-900 text-white flex items-center justify-center text-lg">
-                  {b.icon}
+                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gray-900 text-white flex items-center justify-center">
+                  <Icon size={20} />
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-1">
@@ -1089,7 +1105,8 @@ export default function Home() {
                   </p>
                 </div>
               </motion.div>
-            ))}
+            );
+            })}
           </motion.div>
         </div>
       </section>
@@ -1119,7 +1136,7 @@ export default function Home() {
             <motion.div variants={staggerItem}>
               <FeatureStep
                 id="find"
-                icon="🔍"
+                icon={Compass}
                 title="Find"
                 description="Browse and search thousands of quotes by keyword, tag, or author."
                 onClick={setActiveFeature}
@@ -1129,7 +1146,7 @@ export default function Home() {
             <motion.div variants={staggerItem}>
               <FeatureStep
                 id="save"
-                icon="🔖"
+                icon={Bookmark}
                 title="Save"
                 description="Bookmark the ones that resonate and build your personal collection."
                 onClick={setActiveFeature}
@@ -1139,7 +1156,7 @@ export default function Home() {
             <motion.div variants={staggerItem}>
               <FeatureStep
                 id="share"
-                icon="✨"
+                icon={Share2}
                 title="Share"
                 description="Publish your own quotes and share them with friends."
                 onClick={setActiveFeature}

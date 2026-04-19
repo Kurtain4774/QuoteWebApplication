@@ -1,5 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search, X } from "lucide-react";
 import api from "../../utils/api";
+import QuoteCard from "../../components/QuoteCard";
+import { staggerContainer } from "../../components/Motion";
 
 const SUB_TABS = [
   { id: "community", label: "Community" },
@@ -7,62 +11,6 @@ const SUB_TABS = [
 ];
 
 const PAGE_SIZE = 20;
-
-function QuoteCard({ quote, onToggleSave }) {
-  const [saving, setSaving] = useState(false);
-
-  async function handleSave() {
-    setSaving(true);
-    try {
-      await onToggleSave(quote._id);
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  return (
-    <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm flex flex-col gap-3">
-      <p className="text-gray-800 leading-relaxed text-sm flex-1">
-        "{quote.text}"
-      </p>
-
-      <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div className="flex items-center gap-2 flex-wrap">
-          {quote.author && (
-            <span className="text-xs text-gray-400">— {quote.author}</span>
-          )}
-          {quote.tags?.map((tag) => (
-            <span
-              key={tag}
-              className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full"
-            >
-              #{tag}
-            </span>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-3">
-          {/* Famous quotes have no createdBy — hide the attribution line */}
-          {quote.createdBy?.username && (
-            <span className="text-xs text-gray-300">
-              by {quote.createdBy.username}
-            </span>
-          )}
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            title={quote.isSaved ? "Unsave" : "Save"}
-            className={`text-lg transition-transform hover:scale-110 disabled:opacity-50 ${
-              quote.isSaved ? "text-black" : "text-gray-300"
-            }`}
-          >
-            🔖
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default function Explorer() {
   const [mode, setMode] = useState("community");
@@ -119,9 +67,8 @@ export default function Explorer() {
   );
 
   // Reset + fetch first page whenever mode or search query changes.
-  // Note: cursor is intentionally excluded so that a state update to cursor
-  // mid-pagination doesn't accidentally retrigger a reset.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // cursor is intentionally excluded so a state update mid-pagination
+  // doesn't accidentally retrigger a reset.
   useEffect(() => {
     setCursor(null);
     setHasMore(true);
@@ -169,12 +116,14 @@ export default function Explorer() {
       : "Curated quotes from notable figures.";
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-10">
-      <h2 className="text-2xl font-bold text-gray-900 mb-1">Explorer</h2>
-      <p className="text-gray-400 text-sm mb-6">{subheading}</p>
+    <div className="max-w-6xl mx-auto px-6 py-10">
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold text-gray-900 mb-1">Explorer</h2>
+        <p className="text-gray-400 text-sm">{subheading}</p>
+      </div>
 
       {/* Sub-tab toggle: Community vs Famous */}
-      <div className="flex bg-gray-100 p-1 rounded-lg mb-6">
+      <div className="flex bg-gray-100 p-1 rounded-lg mb-6 max-w-sm">
         {SUB_TABS.map((tab) => (
           <button
             key={tab.id}
@@ -192,13 +141,19 @@ export default function Explorer() {
 
       {/* Search bar */}
       <form onSubmit={handleSearch} className="flex gap-2 mb-8">
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by keyword, author, or tag…"
-          className="flex-1 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-        />
+        <div className="relative flex-1">
+          <Search
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+          />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by keyword, author, or tag…"
+            className="w-full border border-gray-200 rounded-lg pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          />
+        </div>
         <button
           type="submit"
           className="px-4 py-2.5 bg-black text-white text-sm rounded-lg hover:bg-gray-800 transition-colors"
@@ -212,9 +167,10 @@ export default function Explorer() {
               setSearch("");
               setQuery("");
             }}
-            className="px-4 py-2.5 border border-gray-200 text-sm rounded-lg text-gray-500 hover:bg-gray-50 transition-colors"
+            aria-label="Clear search"
+            className="px-3 py-2.5 border border-gray-200 text-sm rounded-lg text-gray-500 hover:bg-gray-50 transition-colors"
           >
-            Clear
+            <X size={16} />
           </button>
         )}
       </form>
@@ -233,15 +189,23 @@ export default function Explorer() {
         </div>
       ) : (
         <>
-          <div className="space-y-4">
-            {quotes.map((quote) => (
-              <QuoteCard
-                key={quote._id}
-                quote={quote}
-                onToggleSave={toggleSave}
-              />
-            ))}
-          </div>
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            animate="show"
+            className="columns-1 md:columns-2 lg:columns-3 gap-4"
+          >
+            <AnimatePresence>
+              {quotes.map((quote) => (
+                <QuoteCard
+                  key={quote._id}
+                  quote={quote}
+                  variant="explorer"
+                  onAction={toggleSave}
+                />
+              ))}
+            </AnimatePresence>
+          </motion.div>
 
           {/* Sentinel for infinite scroll */}
           <div ref={sentinelRef} />

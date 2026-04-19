@@ -1,4 +1,13 @@
 import { useState, useRef, useEffect } from "react";
+import {
+  Library,
+  Compass,
+  PenLine,
+  Users,
+  ChevronDown,
+  Settings as SettingsIcon,
+  LogOut,
+} from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import YourQuotes from "./dashboard/YourQuotes";
 import Explorer from "./dashboard/Explorer";
@@ -7,10 +16,10 @@ import Socials from "./dashboard/Socials";
 import Settings from "./dashboard/Settings";
 
 const TABS = [
-  { id: "quotes", label: "Your Quotes", icon: "🔖" },
-  { id: "explorer", label: "Explorer", icon: "🔍" },
-  { id: "create", label: "Create", icon: "✍️" },
-  { id: "socials", label: "Socials", icon: "👥" },
+  { id: "quotes", label: "Your Quotes", Icon: Library },
+  { id: "explorer", label: "Explorer", Icon: Compass },
+  { id: "create", label: "Create", Icon: PenLine },
+  { id: "socials", label: "Socials", Icon: Users },
 ];
 
 function TabContent({ tab }) {
@@ -67,23 +76,27 @@ export default function Dashboard() {
 
         {/* Nav links */}
         <nav className="flex-1 px-3 py-4 space-y-1">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => {
-                setActiveTab(tab.id);
-                setShowSettings(false);
-              }}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left ${
-                !showSettings && activeTab === tab.id
-                  ? "bg-black text-white"
-                  : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"
-              }`}
-            >
-              <span>{tab.icon}</span>
-              {tab.label}
-            </button>
-          ))}
+          {TABS.map((tab) => {
+            const isActive = !showSettings && activeTab === tab.id;
+            const Icon = tab.Icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  setShowSettings(false);
+                }}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-left ${
+                  isActive
+                    ? "bg-black text-white shadow-[0_0_0_1px_rgba(129,140,248,0.35)]"
+                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"
+                }`}
+              >
+                <Icon size={16} strokeWidth={isActive ? 2.25 : 1.75} />
+                {tab.label}
+              </button>
+            );
+          })}
         </nav>
 
         {/* Profile dropdown trigger */}
@@ -102,20 +115,10 @@ export default function Dashboard() {
               <span className="text-sm text-gray-700 font-medium truncate flex-1">
                 {user?.username}
               </span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className={`h-4 w-4 text-gray-400 transition-transform shrink-0 ${profileOpen ? "rotate-180" : ""}`}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
+              <ChevronDown
+                size={14}
+                className={`text-gray-400 transition-transform shrink-0 ${profileOpen ? "rotate-180" : ""}`}
+              />
             </button>
 
             {/* Dropdown */}
@@ -125,25 +128,7 @@ export default function Dashboard() {
                   onClick={openSettings}
                   className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors text-left"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4 text-gray-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
+                  <SettingsIcon size={16} className="text-gray-400" />
                   Settings
                 </button>
                 <div className="border-t border-gray-100 my-1" />
@@ -151,20 +136,7 @@ export default function Dashboard() {
                   onClick={logout}
                   className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-500 hover:bg-gray-50 transition-colors text-left"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4 text-gray-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                    />
-                  </svg>
+                  <LogOut size={16} className="text-gray-400" />
                   Log out
                 </button>
               </div>
@@ -189,20 +161,10 @@ export default function Dashboard() {
                   {user?.username?.[0]}
                 </div>
                 <span className="text-sm text-gray-600">{user?.username}</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className={`h-3.5 w-3.5 text-gray-400 transition-transform ${profileOpen ? "rotate-180" : ""}`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
+                <ChevronDown
+                  size={12}
+                  className={`text-gray-400 transition-transform ${profileOpen ? "rotate-180" : ""}`}
+                />
               </button>
 
               {/* Mobile dropdown */}
@@ -212,25 +174,7 @@ export default function Dashboard() {
                     onClick={openSettings}
                     className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors text-left"
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4 text-gray-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                    </svg>
+                    <SettingsIcon size={16} className="text-gray-400" />
                     Settings
                   </button>
                   <div className="border-t border-gray-100 my-1" />
@@ -238,20 +182,7 @@ export default function Dashboard() {
                     onClick={logout}
                     className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-gray-500 hover:bg-gray-50 transition-colors text-left"
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4 text-gray-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                      />
-                    </svg>
+                    <LogOut size={16} className="text-gray-400" />
                     Log out
                   </button>
                 </div>
@@ -272,21 +203,25 @@ export default function Dashboard() {
         {/* ── Bottom tab bar (mobile) — hidden when settings is open ── */}
         {!showSettings && (
           <nav className="md:hidden flex border-t border-gray-100 bg-white">
-            {TABS.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 flex flex-col items-center gap-1 py-3 text-xs font-medium transition-colors ${
-                  activeTab === tab.id ? "text-black" : "text-gray-400"
-                }`}
-              >
-                <span className="text-lg leading-none">{tab.icon}</span>
-                <span className="truncate">{tab.label}</span>
-                {activeTab === tab.id && (
-                  <span className="w-1 h-1 rounded-full bg-black" />
-                )}
-              </button>
-            ))}
+            {TABS.map((tab) => {
+              const isActive = activeTab === tab.id;
+              const Icon = tab.Icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex-1 flex flex-col items-center gap-1 py-3 text-xs font-medium transition-colors ${
+                    isActive ? "text-black" : "text-gray-400"
+                  }`}
+                >
+                  <Icon size={18} strokeWidth={isActive ? 2.25 : 1.75} />
+                  <span className="truncate">{tab.label}</span>
+                  {isActive && (
+                    <span className="w-1 h-1 rounded-full bg-indigo-500" />
+                  )}
+                </button>
+              );
+            })}
           </nav>
         )}
       </div>
