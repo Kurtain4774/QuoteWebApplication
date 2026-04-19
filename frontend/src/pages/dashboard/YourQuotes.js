@@ -1,25 +1,30 @@
-import { useState, useEffect } from 'react';
-import api from '../../utils/api';
+import { useState, useEffect } from "react";
+import api from "../../utils/api";
 
 function QuoteCard({ quote, isOwned, onDelete, onUnsave }) {
   const [busy, setBusy] = useState(false);
 
   async function handleDelete() {
     setBusy(true);
-    try { await onDelete(quote._id); } finally { setBusy(false); }
+    try {
+      await onDelete(quote._id);
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function handleUnsave() {
     setBusy(true);
-    try { await onUnsave(quote._id); } finally { setBusy(false); }
+    try {
+      await onUnsave(quote._id);
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
     <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
-      <p
-        className="text-gray-800 leading-relaxed text-sm mb-3"
-        style={{ fontFamily: 'Playfair Display, serif' }}
-      >
+      <p className="text-gray-800 leading-relaxed text-sm mb-3">
         "{quote.text}"
       </p>
 
@@ -29,7 +34,10 @@ function QuoteCard({ quote, isOwned, onDelete, onUnsave }) {
             <span className="text-xs text-gray-400">— {quote.author}</span>
           )}
           {quote.tags?.map((tag) => (
-            <span key={tag} className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+            <span
+              key={tag}
+              className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full"
+            >
               #{tag}
             </span>
           ))}
@@ -85,7 +93,7 @@ export default function YourQuotes() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([api.get('/quotes/mine'), api.get('/quotes/saved')])
+    Promise.all([api.get("/quotes/mine"), api.get("/quotes/saved")])
       .then(([mineRes, savedRes]) => {
         setMine(mineRes.data);
         // exclude quotes the user also created (no duplicates)
@@ -106,20 +114,19 @@ export default function YourQuotes() {
   }
 
   if (loading) {
-    return <div className="text-center py-20 text-gray-300 text-sm">Loading…</div>;
+    return (
+      <div className="text-center py-20 text-gray-300 text-sm">Loading…</div>
+    );
   }
 
   const empty = mine.length === 0 && saved.length === 0;
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-10">
-      <h2
-        className="text-2xl font-bold text-gray-900 mb-1"
-        style={{ fontFamily: 'Playfair Display, serif' }}
-      >
-        Your Quotes
-      </h2>
-      <p className="text-gray-400 text-sm mb-8">Quotes you've created and saved.</p>
+      <h2 className="text-2xl font-bold text-gray-900 mb-1">Your Quotes</h2>
+      <p className="text-gray-400 text-sm mb-8">
+        Quotes you've created and saved.
+      </p>
 
       {empty ? (
         <div className="text-center py-20">

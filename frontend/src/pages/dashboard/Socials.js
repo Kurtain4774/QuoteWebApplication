@@ -1,23 +1,24 @@
-import { useState, useEffect, useRef } from 'react';
-import api from '../../utils/api';
-import { useAuth } from '../../context/AuthContext';
+import { useState, useEffect, useRef } from "react";
+import api from "../../utils/api";
+import { useAuth } from "../../context/AuthContext";
 
 // ── Chat panel ──────────────────────────────────────────────────────────────
 function Chat({ friend, onClose }) {
   const { user } = useAuth();
   const [messages, setMessages] = useState([]);
-  const [text, setText] = useState('');
+  const [text, setText] = useState("");
   const [loading, setLoading] = useState(true);
   const bottomRef = useRef(null);
 
   useEffect(() => {
-    api.get(`/messages/${friend.user._id}`)
+    api
+      .get(`/messages/${friend.user._id}`)
       .then((res) => setMessages(res.data))
       .finally(() => setLoading(false));
   }, [friend.user._id]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   async function sendMessage(e) {
@@ -26,7 +27,7 @@ function Chat({ friend, onClose }) {
     try {
       const res = await api.post(`/messages/${friend.user._id}`, { text });
       setMessages((prev) => [...prev, res.data]);
-      setText('');
+      setText("");
     } catch {
       // message failed silently — could add a toast here later
     }
@@ -36,7 +37,9 @@ function Chat({ friend, onClose }) {
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-        <span className="font-semibold text-gray-800">{friend.user.username}</span>
+        <span className="font-semibold text-gray-800">
+          {friend.user.username}
+        </span>
         <button
           onClick={onClose}
           className="text-gray-400 hover:text-gray-700 text-lg transition-colors"
@@ -50,15 +53,20 @@ function Chat({ friend, onClose }) {
         {loading ? (
           <p className="text-center text-gray-300 text-sm">Loading…</p>
         ) : messages.length === 0 ? (
-          <p className="text-center text-gray-300 text-sm">No messages yet. Say hi!</p>
+          <p className="text-center text-gray-300 text-sm">
+            No messages yet. Say hi!
+          </p>
         ) : (
           messages.map((m) => {
             const isMe = m.from === user._id || m.from?.toString() === user._id;
             return (
-              <div key={m._id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+              <div
+                key={m._id}
+                className={`flex ${isMe ? "justify-end" : "justify-start"}`}
+              >
                 <div
                   className={`max-w-xs px-4 py-2 rounded-2xl text-sm ${
-                    isMe ? 'bg-black text-white' : 'bg-gray-100 text-gray-800'
+                    isMe ? "bg-black text-white" : "bg-gray-100 text-gray-800"
                   }`}
                 >
                   {m.text}
@@ -71,7 +79,10 @@ function Chat({ friend, onClose }) {
       </div>
 
       {/* Input */}
-      <form onSubmit={sendMessage} className="px-6 py-4 border-t border-gray-100 flex gap-2">
+      <form
+        onSubmit={sendMessage}
+        className="px-6 py-4 border-t border-gray-100 flex gap-2"
+      >
         <input
           type="text"
           value={text}
@@ -94,14 +105,15 @@ function Chat({ friend, onClose }) {
 export default function Socials() {
   const [friends, setFriends] = useState([]);
   const [requests, setRequests] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [sentRequests, setSentRequests] = useState(new Set());
   const [activeChat, setActiveChat] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/friends')
+    api
+      .get("/friends")
       .then((res) => {
         setFriends(res.data.friends);
         setRequests(res.data.requests);
@@ -113,7 +125,9 @@ export default function Socials() {
     e.preventDefault();
     if (!searchQuery.trim()) return;
     try {
-      const res = await api.get('/users/search', { params: { username: searchQuery } });
+      const res = await api.get("/users/search", {
+        params: { username: searchQuery },
+      });
       setSearchResults(res.data);
     } catch {
       setSearchResults([]);
@@ -157,13 +171,10 @@ export default function Socials() {
 
   return (
     <div className="max-w-xl mx-auto px-6 py-10">
-      <h2
-        className="text-2xl font-bold text-gray-900 mb-1"
-        style={{ fontFamily: 'Playfair Display, serif' }}
-      >
-        Socials
-      </h2>
-      <p className="text-gray-400 text-sm mb-8">Add friends and send messages.</p>
+      <h2 className="text-2xl font-bold text-gray-900 mb-1">Socials</h2>
+      <p className="text-gray-400 text-sm mb-8">
+        Add friends and send messages.
+      </p>
 
       {/* Search users */}
       <section className="mb-10">
@@ -196,9 +207,13 @@ export default function Socials() {
                   key={u._id}
                   className="flex items-center justify-between bg-white border border-gray-100 rounded-xl px-4 py-3"
                 >
-                  <span className="text-sm font-medium text-gray-700">{u.username}</span>
+                  <span className="text-sm font-medium text-gray-700">
+                    {u.username}
+                  </span>
                   {isFriend ? (
-                    <span className="text-xs text-gray-400">Already friends</span>
+                    <span className="text-xs text-gray-400">
+                      Already friends
+                    </span>
                   ) : sent ? (
                     <span className="text-xs text-gray-400">Request sent</span>
                   ) : (
@@ -228,7 +243,9 @@ export default function Socials() {
                 key={r._id}
                 className="flex items-center justify-between bg-white border border-gray-100 rounded-xl px-4 py-3"
               >
-                <span className="text-sm font-medium text-gray-700">{r.from.username}</span>
+                <span className="text-sm font-medium text-gray-700">
+                  {r.from.username}
+                </span>
                 <div className="flex gap-2">
                   <button
                     onClick={() => acceptRequest(r._id)}
@@ -258,7 +275,9 @@ export default function Socials() {
         {loading ? (
           <p className="text-sm text-gray-300">Loading…</p>
         ) : friends.length === 0 ? (
-          <p className="text-sm text-gray-400">No friends yet. Search for someone above.</p>
+          <p className="text-sm text-gray-400">
+            No friends yet. Search for someone above.
+          </p>
         ) : (
           <div className="space-y-2">
             {friends.map((f) => (

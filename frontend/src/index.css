@@ -1,10 +1,143 @@
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
+@import url("https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap");
+
+html,
+body {
+  font-family: "Lexend", sans-serif !important;
+  font-weight: 250 !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+a,
+span,
+button,
+input,
+textarea,
+select,
+label,
+li {
+  font-family: "Lexend", sans-serif !important;
+  font-weight: 250 !important;
+}
+
+/* 2. Apply it to the body correctly */
 body {
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Dark theme overrides ──────────────────────────────────────────────── */
+body.theme-dark {
+  background-color: #0f172a;
+  color: #e2e8f0;
+}
+
+body.theme-dark .bg-white {
+  background-color: #1e293b !important;
+}
+body.theme-dark .bg-gray-50 {
+  background-color: #0f172a !important;
+}
+body.theme-dark .bg-gray-100 {
+  background-color: #1e293b !important;
+}
+body.theme-dark .bg-gray-200 {
+  background-color: #334155 !important;
+}
+body.theme-dark .text-gray-900 {
+  color: #f1f5f9 !important;
+}
+body.theme-dark .text-gray-800 {
+  color: #e2e8f0 !important;
+}
+body.theme-dark .text-gray-700 {
+  color: #cbd5e1 !important;
+}
+body.theme-dark .text-gray-600 {
+  color: #94a3b8 !important;
+}
+body.theme-dark .text-gray-500 {
+  color: #64748b !important;
+}
+body.theme-dark .text-gray-400 {
+  color: #475569 !important;
+}
+body.theme-dark .text-black {
+  color: #f1f5f9 !important;
+}
+body.theme-dark .border-gray-100 {
+  border-color: #1e293b !important;
+}
+body.theme-dark .border-gray-200 {
+  border-color: #334155 !important;
+}
+body.theme-dark .shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.4) !important;
+}
+body.theme-dark .shadow-lg {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6) !important;
+}
+
+body.theme-dark .hover\:bg-gray-50:hover {
+  background-color: #1e293b !important;
+}
+body.theme-dark .hover\:bg-gray-100:hover {
+  background-color: #334155 !important;
+}
+body.theme-dark .hover\:text-gray-800:hover {
+  color: #f1f5f9 !important;
+}
+body.theme-dark .hover\:text-gray-700:hover {
+  color: #e2e8f0 !important;
+}
+
+body.theme-dark input,
+body.theme-dark textarea {
+  background-color: #1e293b !important;
+  color: #e2e8f0 !important;
+  border-color: #334155 !important;
+}
+
+body.theme-dark input::placeholder,
+body.theme-dark textarea::placeholder {
+  color: #475569 !important;
+}
+
+/* ── Custom theme overrides ────────────────────────────────────────────── */
+body.theme-custom .bg-white {
+  background-color: var(--custom-bg) !important;
+}
+body.theme-custom .bg-gray-50 {
+  background-color: var(--custom-bg) !important;
+  filter: brightness(0.97);
+}
+body.theme-custom .text-gray-900,
+body.theme-custom .text-gray-800,
+body.theme-custom .text-gray-700,
+body.theme-custom .text-black {
+  color: var(--custom-text) !important;
+}
+body.theme-custom .text-gray-600,
+body.theme-custom .text-gray-500 {
+  color: var(--custom-text) !important;
+  opacity: 0.7;
+}
+
+body.theme-custom input,
+body.theme-custom textarea {
+  background-color: var(--custom-bg) !important;
+  color: var(--custom-text) !important;
 }
