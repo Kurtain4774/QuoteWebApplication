@@ -1,6 +1,10 @@
 import axios from 'axios';
 
-const api = axios.create({ baseURL: 'http://localhost:5000/api' });
+const baseURL = process.env.NODE_ENV === 'production'
+  ? '/api'
+  : 'http://localhost:5000/api';
+
+const api = axios.create({ baseURL });
 
 // Attach JWT from localStorage to every request
 api.interceptors.request.use((config) => {

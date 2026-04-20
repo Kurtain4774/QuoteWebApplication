@@ -3,7 +3,9 @@ import axios from "axios";
 import api from "../utils/api";
 import { useTheme } from "./ThemeContext";
 
-const API = "http://localhost:5000/api";
+const API = process.env.NODE_ENV === 'production'
+  ? '/api'
+  : 'http://localhost:5000/api';
 
 const AuthContext = createContext(null);
 
