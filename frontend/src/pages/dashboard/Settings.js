@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import api from '../../utils/api';
@@ -84,7 +85,8 @@ export default function Settings({ onClose }) {
   }
 
   function syncPreferences(t, bg, txt, fs) {
-    api.put('/users/preferences', { theme: t, customBg: bg, customText: txt, fontSize: fs }).catch(() => {});
+    api.put('/users/preferences', { theme: t, customBg: bg, customText: txt, fontSize: fs })
+      .catch(() => toast.error("Couldn't save preference — changes may not persist across devices."));
   }
 
   function handleThemeChange(t) {

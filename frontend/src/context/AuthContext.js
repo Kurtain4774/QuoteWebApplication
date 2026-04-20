@@ -20,7 +20,6 @@ export function AuthProvider({ children }) {
   async function fetchAndApplyPreferences() {
     try {
       const res = await api.get("/users/preferences");
-      console.log("Fetched preferences:", res.data.preferences);
       applyPreferences(res.data.preferences);
     } catch {
       // non-fatal: user stays logged in, theme defaults to light
