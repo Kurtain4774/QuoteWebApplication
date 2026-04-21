@@ -15,6 +15,8 @@ import {
   Library,
   PenLine,
   Users,
+  Trash2,
+  Search,
 } from "lucide-react";
 import api from "../utils/api";
 import { useAuth } from "../context/AuthContext";
@@ -50,47 +52,115 @@ const staggerItem = {
 
 // ── Famous-quote ambient animation (hero backdrop) ─────────────────────────
 const QUOTES = [
-  { id: "q1", text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
-  { id: "q2", text: "In the middle of every difficulty lies opportunity.", author: "Albert Einstein" },
-  { id: "q3", text: "It does not matter how slowly you go as long as you do not stop.", author: "Confucius" },
-  { id: "q4", text: "The only journey is the one within.", author: "Rainer Maria Rilke" },
-  { id: "q5", text: "Whatever you are, be a good one.", author: "Abraham Lincoln" },
-  { id: "q6", text: "Not all those who wander are lost.", author: "J.R.R. Tolkien" },
-  { id: "q7", text: "The unexamined life is not worth living.", author: "Socrates" },
-  { id: "q8", text: "To be yourself in a world that is constantly trying to make you something else is the greatest accomplishment.", author: "Ralph Waldo Emerson" },
-  { id: "q9", text: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.", author: "Aristotle" },
-  { id: "q10", text: "The best way out is always through.", author: "Robert Frost" },
-  { id: "q11", text: "Happiness is not something ready-made. It comes from your own actions.", author: "Dalai Lama" },
+  {
+    id: "q1",
+    text: "The only way to do great work is to love what you do.",
+    author: "Steve Jobs",
+  },
+  {
+    id: "q2",
+    text: "In the middle of every difficulty lies opportunity.",
+    author: "Albert Einstein",
+  },
+  {
+    id: "q3",
+    text: "It does not matter how slowly you go as long as you do not stop.",
+    author: "Confucius",
+  },
+  {
+    id: "q4",
+    text: "The only journey is the one within.",
+    author: "Rainer Maria Rilke",
+  },
+  {
+    id: "q5",
+    text: "Whatever you are, be a good one.",
+    author: "Abraham Lincoln",
+  },
+  {
+    id: "q6",
+    text: "Not all those who wander are lost.",
+    author: "J.R.R. Tolkien",
+  },
+  {
+    id: "q7",
+    text: "The unexamined life is not worth living.",
+    author: "Socrates",
+  },
+  {
+    id: "q8",
+    text: "To be yourself in a world that is constantly trying to make you something else is the greatest accomplishment.",
+    author: "Ralph Waldo Emerson",
+  },
+  {
+    id: "q9",
+    text: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.",
+    author: "Aristotle",
+  },
+  {
+    id: "q10",
+    text: "The best way out is always through.",
+    author: "Robert Frost",
+  },
+  {
+    id: "q11",
+    text: "Happiness is not something ready-made. It comes from your own actions.",
+    author: "Dalai Lama",
+  },
   { id: "q12", text: "What we think, we become.", author: "Buddha" },
-  { id: "q13", text: "Go confidently in the direction of your dreams.", author: "Henry David Thoreau" },
-  { id: "q14", text: "You must be the change you wish to see in the world.", author: "Mahatma Gandhi" },
-  { id: "q15", text: "The mind is everything. What you think you become.", author: "Marcus Aurelius" },
-  { id: "q16", text: "A room without books is like a body without a soul.", author: "Cicero" },
-  { id: "q17", text: "Tell me and I forget. Teach me and I remember. Involve me and I learn.", author: "Benjamin Franklin" },
-  { id: "q18", text: "The purpose of our lives is to be happy.", author: "Dalai Lama" },
+  {
+    id: "q13",
+    text: "Go confidently in the direction of your dreams.",
+    author: "Henry David Thoreau",
+  },
+  {
+    id: "q14",
+    text: "You must be the change you wish to see in the world.",
+    author: "Mahatma Gandhi",
+  },
+  {
+    id: "q15",
+    text: "The mind is everything. What you think you become.",
+    author: "Marcus Aurelius",
+  },
+  {
+    id: "q16",
+    text: "A room without books is like a body without a soul.",
+    author: "Cicero",
+  },
+  {
+    id: "q17",
+    text: "Tell me and I forget. Teach me and I remember. Involve me and I learn.",
+    author: "Benjamin Franklin",
+  },
+  {
+    id: "q18",
+    text: "The purpose of our lives is to be happy.",
+    author: "Dalai Lama",
+  },
 ];
 
 // Desktop slots — four corner boxes that leave the center (wordmark zone),
 // top (navbar), and bottom (CTAs) clear. 3 concurrent + 4 slots guarantees
 // rotation: there's always one empty corner for the next quote.
 const DESKTOP_SLOTS = [
-  { top: "12%", left: "3%",  width: "30%", align: "left"  },
+  { top: "12%", left: "3%", width: "30%", align: "left" },
   { top: "12%", left: "67%", width: "30%", align: "right" },
-  { top: "64%", left: "3%",  width: "30%", align: "left"  },
+  { top: "64%", left: "3%", width: "30%", align: "left" },
   { top: "64%", left: "67%", width: "30%", align: "right" },
 ];
 
 // Mobile slots — two rows above wordmark + one row below, 2 concurrent.
 // Wordmark sits roughly 40-60% vertical on mobile; these avoid that band.
 const MOBILE_SLOTS = [
-  { top: "9%",  left: "5%", width: "90%", align: "center" },
+  { top: "9%", left: "5%", width: "90%", align: "center" },
   { top: "24%", left: "5%", width: "90%", align: "center" },
   { top: "66%", left: "5%", width: "90%", align: "center" },
 ];
 
 function useMediaQuery(query) {
   const [matches, setMatches] = useState(() =>
-    typeof window !== "undefined" ? window.matchMedia(query).matches : false
+    typeof window !== "undefined" ? window.matchMedia(query).matches : false,
   );
   useEffect(() => {
     const mql = window.matchMedia(query);
@@ -184,7 +254,7 @@ function QuoteDetailModal({ quote, onClose }) {
         aria-label="Quote detail"
         className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-8 md:p-12"
       >
-        <div className="text-6xl text-gray-200 font-serif leading-none mb-2 select-none">
+        <div className="text-6xl text-gray-400 font-serif leading-none mb-2 select-none">
           &ldquo;
         </div>
         <p className="text-xl md:text-2xl font-serif text-gray-900 leading-relaxed mb-6">
@@ -255,23 +325,21 @@ function FloatingQuotes({ onQuoteClick }) {
 
     function pickQuoteAndSlot() {
       const activeIds = new Set(
-        lanesRef.current.filter(Boolean).map((l) => l.quoteId)
+        lanesRef.current.filter(Boolean).map((l) => l.quoteId),
       );
       const activeSlots = new Set(
-        lanesRef.current.filter(Boolean).map((l) => l.slotIndex)
+        lanesRef.current.filter(Boolean).map((l) => l.slotIndex),
       );
       const recent = new Set(recentRef.current);
 
       let pool = QUOTES.filter(
-        (q) => !activeIds.has(q.id) && !recent.has(q.id)
+        (q) => !activeIds.has(q.id) && !recent.has(q.id),
       );
       if (pool.length === 0) pool = QUOTES.filter((q) => !activeIds.has(q.id));
       if (pool.length === 0) return null;
       const quote = pool[Math.floor(Math.random() * pool.length)];
 
-      let slotPool = slots
-        .map((_, i) => i)
-        .filter((i) => !activeSlots.has(i));
+      let slotPool = slots.map((_, i) => i).filter((i) => !activeSlots.has(i));
       if (slotPool.length === 0) slotPool = slots.map((_, i) => i);
       const slotIndex = slotPool[Math.floor(Math.random() * slotPool.length)];
 
@@ -338,10 +406,8 @@ function FloatingQuotes({ onQuoteClick }) {
           if (!mountedRef.current) return;
           updateLane(i, null);
           // After exit fade completes + gap, start the next quote in this lane.
-          timers.push(
-            setTimeout(() => startLane(i), FADE_MS + GAP_MS)
-          );
-        }, FADE_MS + STEADY_MS)
+          timers.push(setTimeout(() => startLane(i), FADE_MS + GAP_MS));
+        }, FADE_MS + STEADY_MS),
       );
     }
 
@@ -371,8 +437,8 @@ function FloatingQuotes({ onQuoteClick }) {
             slot.align === "left"
               ? "text-left"
               : slot.align === "right"
-              ? "text-right"
-              : "text-center";
+                ? "text-right"
+                : "text-center";
           return (
             <motion.button
               type="button"
@@ -384,7 +450,9 @@ function FloatingQuotes({ onQuoteClick }) {
               initial={{ opacity: 0 }}
               animate={{ opacity: reducedMotion ? 1 : 0.92 }}
               exit={{ opacity: 0 }}
-              whileHover={reducedMotion ? undefined : { opacity: 1, scale: 1.02 }}
+              whileHover={
+                reducedMotion ? undefined : { opacity: 1, scale: 1.02 }
+              }
               transition={{
                 duration: reducedMotion ? 0 : 2.2,
                 ease: "easeInOut",
@@ -444,7 +512,7 @@ function Hero() {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="text-xl font-bold tracking-tight text-white drop-shadow"
+          className="text-xl font-bold tracking-tight text-white drop-shadow select-none"
         >
           Quoted
         </motion.span>
@@ -492,7 +560,7 @@ function Hero() {
       {/* Bottom CTAs — fade + drift on scroll */}
       <motion.div
         style={{ opacity: contentOpacity, y: contentY }}
-        className="absolute bottom-0 left-0 right-0 z-20 flex flex-col items-center pb-28 md:pb-20"
+        className="absolute bottom-0 left-0 right-0 z-20 flex flex-col items-center pb-12 md:pb-20"
       >
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -571,65 +639,226 @@ const FEATURE_DETAILS = {
 
 // ── Dashboard UI mockup ─────────────────────────────────────────────────────
 function DashboardMockup() {
+  const [activeTab, setActiveTab] = useState("quotes");
+
+  const tabs = [
+    { id: "quotes", label: "Your Quotes", icon: Library },
+    { id: "explorer", label: "Explorer", icon: Compass },
+    { id: "create", label: "Create", icon: PenLine },
+    { id: "socials", label: "Socials", icon: Users },
+  ];
+
+  const tabContent = {
+    quotes: (
+      <div className="p-4 space-y-3">
+        <div className="flex items-center gap-2 bg-white rounded-lg border border-gray-200 px-3 py-1.5">
+          <Search size={12} className="text-gray-400" />
+          <span className="text-xs text-gray-400">Search your quotes…</span>
+        </div>
+        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+          Created by you
+        </p>
+        {[
+          {
+            text: "The only way to do great work is to love what you do.",
+            author: "Steve Jobs",
+            tag: "motivation",
+          },
+          {
+            text: "In the middle of every difficulty lies opportunity.",
+            author: "Albert Einstein",
+            tag: "wisdom",
+          },
+        ].map((q, i) => (
+          <div
+            key={i}
+            className="bg-white rounded-xl p-3 border border-gray-100 shadow-sm"
+          >
+            <div className="flex items-start justify-between gap-2">
+              <p className="text-xs text-gray-800 leading-relaxed flex-1">
+                "{q.text}"
+              </p>
+              <Trash2
+                size={12}
+                className="text-gray-300 flex-shrink-0 mt-0.5"
+              />
+            </div>
+            <div className="flex items-center justify-between mt-2">
+              <span className="text-xs text-gray-400">— {q.author}</span>
+              <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+                #{q.tag}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    ),
+    explorer: (
+      <div className="p-4 space-y-3">
+        <div className="flex gap-2">
+          <span className="text-xs bg-gray-900 text-white px-3 py-1 rounded-full">
+            Community
+          </span>
+          <span className="text-xs text-gray-400 px-3 py-1 rounded-full border border-gray-200">
+            Famous
+          </span>
+        </div>
+        <div className="flex items-center gap-2 bg-white rounded-lg border border-gray-200 px-3 py-1.5">
+          <Search size={12} className="text-gray-400" />
+          <span className="text-xs text-gray-400">
+            Search by keyword, tag, author…
+          </span>
+        </div>
+        {[
+          {
+            text: "It does not matter how slowly you go as long as you do not stop.",
+            author: "Confucius",
+            tag: "philosophy",
+            saved: true,
+          },
+          {
+            text: "Simplicity is the ultimate sophistication.",
+            author: "Leonardo da Vinci",
+            tag: "design",
+            saved: false,
+          },
+        ].map((q, i) => (
+          <div
+            key={i}
+            className="bg-white rounded-xl p-3 border border-gray-100 shadow-sm"
+          >
+            <div className="flex items-start justify-between gap-2">
+              <p className="text-xs text-gray-800 leading-relaxed flex-1">
+                "{q.text}"
+              </p>
+              <Bookmark
+                size={12}
+                className={`flex-shrink-0 mt-0.5 ${
+                  q.saved ? "fill-gray-800 text-gray-800" : "text-gray-300"
+                }`}
+              />
+            </div>
+            <div className="flex items-center justify-between mt-2">
+              <span className="text-xs text-gray-400">— {q.author}</span>
+              <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+                #{q.tag}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    ),
+    create: (
+      <div className="p-4 space-y-3">
+        <p className="text-xs font-semibold text-gray-700">New Quote</p>
+        <div className="bg-white rounded-xl border border-gray-200 p-3 space-y-2">
+          <p className="text-xs text-gray-400 leading-relaxed italic min-h-[48px]">
+            "Write a quote that moved you…"
+          </p>
+          <div className="border-t border-gray-100 pt-2 space-y-2">
+            <div className="bg-gray-50 rounded-lg border border-gray-200 px-3 py-1.5">
+              <p className="text-xs text-gray-300">Author (optional)</p>
+            </div>
+            <div className="bg-gray-50 rounded-lg border border-gray-200 px-3 py-1.5">
+              <p className="text-xs text-gray-300">Tags (optional)</p>
+            </div>
+          </div>
+        </div>
+        <button className="w-full bg-gray-900 text-white text-xs py-2 rounded-lg font-medium">
+          Publish quote
+        </button>
+      </div>
+    ),
+    socials: (
+      <div className="p-4 space-y-3">
+        <div className="flex items-center gap-2 bg-white rounded-lg border border-gray-200 px-3 py-1.5">
+          <Search size={12} className="text-gray-400" />
+          <span className="text-xs text-gray-400">
+            Find people by username…
+          </span>
+        </div>
+        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+          Friends (2)
+        </p>
+        {[
+          { name: "alex_reads", initial: "A" },
+          { name: "philosophia", initial: "P" },
+        ].map((u, i) => (
+          <div
+            key={i}
+            className="flex items-center gap-3 bg-white rounded-xl p-3 border border-gray-100 shadow-sm"
+          >
+            <div className="w-7 h-7 rounded-full bg-gray-900 text-white text-xs flex items-center justify-center font-semibold flex-shrink-0">
+              {u.initial}
+            </div>
+            <span className="text-xs text-gray-700 flex-1">{u.name}</span>
+            <button className="text-xs border border-gray-200 px-2 py-1 rounded-lg text-gray-500">
+              Message
+            </button>
+          </div>
+        ))}
+      </div>
+    ),
+  };
+
   return (
-    <div
-      className="relative w-full max-w-2xl mx-auto select-none"
-      aria-hidden="true"
-    >
+    <div className="relative w-full max-w-2xl mx-auto select-none">
       {/* Glow behind the card */}
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 rounded-3xl blur-2xl opacity-60 scale-105" />
 
-      <div className="relative bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
-        {/* Tab bar */}
-        <div className="flex items-center gap-1 px-5 pt-4 pb-0 border-b border-gray-100">
-          {["Your Quotes", "Explorer", "Create", "Socials"].map((tab, i) => (
-            <div
-              key={tab}
-              className={`px-4 py-2 text-xs font-medium rounded-t-lg ${
-                i === 0
-                  ? "bg-black text-white"
-                  : "text-gray-400 hover:text-gray-600"
-              }`}
-            >
-              {tab}
+      <div
+        className="relative bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden flex"
+        style={{ minHeight: 320 }}
+      >
+        {/* Sidebar */}
+        <div className="w-36 flex-shrink-0 bg-gray-50 border-r border-gray-100 flex flex-col py-4">
+          <span className="text-sm font-bold text-gray-900 px-4 mb-5">
+            Quoted
+          </span>
+          <div className="space-y-1 px-2 flex-1">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              const active = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors text-left ${
+                    active
+                      ? "bg-gray-900 text-white"
+                      : "text-gray-500 hover:bg-gray-200 hover:text-gray-700"
+                  }`}
+                >
+                  <Icon size={13} />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+          {/* Profile */}
+          <div className="px-3 pt-3 border-t border-gray-200 mt-2">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-full bg-gray-900 text-white text-xs flex items-center justify-center font-semibold">
+                K
+              </div>
+              <span className="text-xs text-gray-500 truncate">kurtis</span>
             </div>
-          ))}
+          </div>
         </div>
 
-        {/* Quote cards */}
-        <div className="p-5 space-y-3 bg-gray-50">
-          {[
-            {
-              text: "The only way to do great work is to love what you do.",
-              author: "Steve Jobs",
-              tag: "motivation",
-            },
-            {
-              text: "In the middle of every difficulty lies opportunity.",
-              author: "Albert Einstein",
-              tag: "wisdom",
-            },
-            {
-              text: "It does not matter how slowly you go as long as you do not stop.",
-              author: "Confucius",
-              tag: "philosophy",
-            },
-          ].map((q, i) => (
-            <div
-              key={i}
-              className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm"
+        {/* Content area */}
+        <div className="flex-1 bg-gray-50 overflow-hidden">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.18 }}
             >
-              <p className="text-sm text-gray-800 leading-relaxed mb-2">
-                "{q.text}"
-              </p>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-400">— {q.author}</span>
-                <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
-                  #{q.tag}
-                </span>
-              </div>
-            </div>
-          ))}
+              {tabContent[activeTab]}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </div>
@@ -782,7 +1011,7 @@ function StatsSection() {
           observer.disconnect();
         }
       },
-      { threshold: 0.3 }
+      { threshold: 0.3 },
     );
 
     observer.observe(el);
@@ -933,7 +1162,9 @@ function InlineRegister() {
           className="w-full max-w-md md:justify-self-end bg-white rounded-2xl shadow-xl border border-gray-100 p-8"
         >
           <h3 className="text-2xl font-bold mb-1">Create your account</h3>
-          <p className="text-gray-400 text-sm mb-6">It's free and takes seconds.</p>
+          <p className="text-gray-400 text-sm mb-6">
+            It's free and takes seconds.
+          </p>
 
           {error && (
             <div className="bg-red-50 text-red-600 text-sm rounded-lg px-4 py-3 mb-5">
@@ -941,7 +1172,11 @@ function InlineRegister() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-4"
+            autoComplete="off"
+          >
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Username
@@ -1022,7 +1257,7 @@ export default function Home() {
       <Hero />
 
       {/* ── What is Quoted? ──────────────────────────────────────── */}
-      <section className="px-6 md:px-12 pt-24 pb-12 max-w-6xl mx-auto text-center">
+      <section className="px-6 md:px-12 pt-28 pb-12 max-w-6xl mx-auto text-center">
         <Reveal>
           <span className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-4 block">
             What is Quoted?
@@ -1043,7 +1278,7 @@ export default function Home() {
       </section>
 
       {/* ── Dashboard showcase ───────────────────────────────────── */}
-      <section className="px-6 md:px-12 py-16 max-w-6xl mx-auto">
+      <section className="px-6 md:px-12 pt-16 pb-24 max-w-6xl mx-auto">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           {/* Left: dashboard mockup — slides in with a 3D tilt that straightens */}
           <motion.div
@@ -1088,24 +1323,24 @@ export default function Home() {
             ].map((b) => {
               const Icon = b.icon;
               return (
-              <motion.div
-                key={b.title}
-                variants={staggerItem}
-                className="flex gap-4"
-              >
-                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gray-900 text-white flex items-center justify-center">
-                  <Icon size={20} />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">
-                    {b.title}
-                  </h3>
-                  <p className="text-sm text-gray-500 leading-relaxed">
-                    {b.body}
-                  </p>
-                </div>
-              </motion.div>
-            );
+                <motion.div
+                  key={b.title}
+                  variants={staggerItem}
+                  className="flex gap-4"
+                >
+                  <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gray-900 text-white flex items-center justify-center">
+                    <Icon size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-1">
+                      {b.title}
+                    </h3>
+                    <p className="text-sm text-gray-500 leading-relaxed">
+                      {b.body}
+                    </p>
+                  </div>
+                </motion.div>
+              );
             })}
           </motion.div>
         </div>
@@ -1118,7 +1353,7 @@ export default function Home() {
             <span className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-4 block">
               How to use it
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+            <h2 className="text-3xl py-4 md:text-4xl font-bold text-gray-900 mb-3">
               Three steps from cover to collection
             </h2>
             <p className="text-gray-400 text-sm">
