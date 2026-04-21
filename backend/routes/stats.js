@@ -7,6 +7,7 @@ const router = express.Router();
 // Public aggregate stats for the homepage counters.
 // Cached in-process for 60s so scroll-triggered counters don't hammer the DB.
 let cache = { data: null, expires: 0 };
+let trendingCache = { data: null, expires: 0 };
 const TTL_MS = 60 * 1000;
 
 router.get('/', async (req, res) => {
@@ -39,6 +40,27 @@ router.get('/', async (req, res) => {
 
   cache = { data, expires: Date.now() + TTL_MS };
   res.json(data);
+});
+
+// Public endpoint: top 5 most-bookmarked quotes for the homepage Trending section.
+router.get('/trending', async (req, res) => {
+  if (trendingCache.data && Date.now() < trendingCache.expires) {
+    return res.json(trendingCache.data);
+  }
+
+  const quotes = await Quote.aggregate([
+    { $project: {
+        text: 1,
+        author: 1,
+        tags: 1,
+        saveCount: { $size: { $ifNull: ['$savedBy', []] } },
+    }},
+    { $sort: { saveCount: -1 } },
+    { $limit: 5 },
+  ]);
+
+  trendingCache = { data: quotes, expires: Date.now() + TTL_MS };
+  res.json(quotes);
 });
 
 module.exports = router;

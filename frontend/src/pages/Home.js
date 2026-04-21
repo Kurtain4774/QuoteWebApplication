@@ -468,7 +468,7 @@ function FloatingQuotes({ onQuoteClick }) {
               <p className="text-lg md:text-2xl lg:text-3xl font-serif leading-snug drop-shadow-lg">
                 &ldquo;{item.text}&rdquo;
               </p>
-              <p className="mt-2 text-xs md:text-sm tracking-widest uppercase text-white/60">
+              <p className="mt-2 text-xs md:text-sm tracking-widest uppercase text-white/70">
                 — {item.author}
               </p>
             </motion.button>
@@ -479,10 +479,44 @@ function FloatingQuotes({ onQuoteClick }) {
   );
 }
 
+// ── Typewriter hook: schedules character-by-character reveals ──────────────
+function useTypewriter(words) {
+  const [displayed, setDisplayed] = useState(words.map(() => ""));
+  useEffect(() => {
+    const timers = [];
+    words.forEach(({ text, startMs, minMs, maxMs }, i) => {
+      let elapsed = startMs;
+      for (let c = 1; c <= text.length; c++) {
+        // Spaces get a natural word-break pause; other chars vary randomly.
+        const isSpace = text[c - 1] === " ";
+        const lo = isSpace ? maxMs : minMs;
+        const hi = isSpace ? maxMs * 1.8 : maxMs;
+        elapsed += lo + Math.random() * (hi - lo);
+        const fireAt = elapsed;
+        timers.push(
+          setTimeout(() => {
+            setDisplayed(prev => {
+              const next = [...prev];
+              next[i] = text.slice(0, c);
+              return next;
+            });
+          }, fireAt)
+        );
+      }
+    });
+    return () => timers.forEach(clearTimeout);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  return displayed;
+}
+
 // ── Hero with scroll-linked parallax ───────────────────────────────────────
 function Hero() {
   const ref = useRef(null);
   const [selectedQuote, setSelectedQuote] = useState(null);
+  const [quotedText, sloganText] = useTypewriter([
+    { text: "Quoted",            startMs: 50,   minMs: 60,  maxMs: 130 },
+    { text: "Words move worlds", startMs: 700,  minMs: 35,  maxMs: 85  },
+  ]);
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
@@ -494,6 +528,8 @@ function Hero() {
   return (
     <section
       ref={ref}
+      id="hero"
+      data-dark
       className="relative h-screen w-full overflow-hidden bg-[#0a0a0f]"
     >
       {/* Cursor-follow glow — low-key radial gradient that trails the mouse */}
@@ -503,33 +539,6 @@ function Hero() {
       {/* Subtle vignette so CTAs at the bottom stay readable */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/50 pointer-events-none" />
 
-      {/* Navbar — fades with scroll */}
-      <motion.nav
-        style={{ opacity: contentOpacity }}
-        className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-6 md:px-12 py-5"
-      >
-        <motion.span
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="text-xl font-bold tracking-tight text-white drop-shadow select-none"
-        >
-          Quoted
-        </motion.span>
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
-          className="flex items-center gap-3"
-        >
-          <Link
-            to="/login"
-            className="px-4 py-2 text-sm font-medium text-white border border-white/50 rounded-lg hover:bg-white/10 hover:border-white transition-all"
-          >
-            Log in
-          </Link>
-        </motion.div>
-      </motion.nav>
 
       {/* Centered wordmark — pointer-events-none so clicks pass through to
           the floating quotes behind it. */}
@@ -538,22 +547,18 @@ function Hero() {
         className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none px-6"
       >
         <div className="text-center">
-          <motion.h1
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.2, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="font-serif text-7xl md:text-8xl lg:text-9xl font-bold text-white tracking-tight drop-shadow-2xl"
-          >
-            Quoted
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1.2, delay: 0.8, ease: "easeOut" }}
-            className="mt-4 md:mt-6 text-xs md:text-sm tracking-[0.4em] uppercase text-white/95 drop-shadow-lg"
-          >
-            Words move worlds
-          </motion.p>
+          <h1 className="font-serif text-7xl md:text-8xl lg:text-9xl font-bold text-white tracking-tight drop-shadow-2xl">
+            {quotedText}
+            {quotedText.length < 6 && (
+              <span className="animate-pulse opacity-70">|</span>
+            )}
+          </h1>
+          <p className="mt-4 md:mt-6 text-xs md:text-sm tracking-[0.4em] uppercase text-white/95 drop-shadow-lg min-h-[1em]">
+            {sloganText}
+            {sloganText.length > 0 && sloganText.length < 16 && (
+              <span className="animate-pulse opacity-70">|</span>
+            )}
+          </p>
         </div>
       </motion.div>
 
@@ -565,15 +570,21 @@ function Hero() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.4, delay: 1.1, ease: [0.16, 1, 0.3, 1] }}
           className="flex items-center gap-3 mb-6"
         >
-          <Link
-            to="/register"
-            className="px-7 py-3.5 bg-white text-gray-900 text-sm font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-xl"
+          <motion.div
+            whileHover={{ y: -4, scale: 1.04, boxShadow: "0 10px 20px -8px rgba(255,255,255,0.35)" }}
+            transition={{ type: "spring", stiffness: 300, damping: 18 }}
+            className="rounded-lg shadow-xl"
           >
-            Create free account
-          </Link>
+            <Link
+              to="/register"
+              className="block px-7 py-3.5 bg-white text-gray-900 text-sm font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              Save your first quote
+            </Link>
+          </motion.div>
         </motion.div>
 
         <motion.div
@@ -938,142 +949,102 @@ function FeatureStep({ id, icon, title, description, onClick, isLast }) {
   );
 }
 
-// ── Animated stat counter ───────────────────────────────────────────────────
-// Animates from 0 → target with easeOutQuart easing once `active` flips true.
-function AnimatedNumber({ value, active, duration = 2000 }) {
-  const [display, setDisplay] = useState(0);
+// ── Trending This Week section ──────────────────────────────────────────────
+function TrendingSection() {
+  const [quotes, setQuotes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
 
-  useEffect(() => {
-    if (!active || value == null) return;
-
-    let rafId;
-    const start = performance.now();
-    const from = 0;
-    const to = value;
-
-    function tick(now) {
-      const elapsed = now - start;
-      const t = Math.min(elapsed / duration, 1);
-      // easeOutQuart — fast start, gentle settle
-      const eased = 1 - Math.pow(1 - t, 4);
-      setDisplay(Math.round(from + (to - from) * eased));
-      if (t < 1) rafId = requestAnimationFrame(tick);
-    }
-
-    rafId = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafId);
-  }, [active, value, duration]);
-
-  return <>{display.toLocaleString()}</>;
-}
-
-// ── Stats section ───────────────────────────────────────────────────────────
-function StatsSection() {
-  const [stats, setStats] = useState(null);
-  const [active, setActive] = useState(false);
-  const sectionRef = useRef(null);
-
-  // Fetch real values once on mount
   useEffect(() => {
     let mounted = true;
     api
-      .get("/stats")
-      .then((res) => {
-        if (mounted) setStats(res.data);
-      })
-      .catch(() => {
-        // Fallback values if the API is down — still lets the animation run
-        if (mounted) {
-          setStats({
-            quotes: 0,
-            users: 0,
-            authors: 0,
-            saves: 0,
-            tags: 0,
-            quotesThisWeek: 0,
-          });
-        }
-      });
-    return () => {
-      mounted = false;
-    };
+      .get("/stats/trending")
+      .then((res) => { if (mounted) setQuotes(res.data); })
+      .catch(() => { if (mounted) setFailed(true); })
+      .finally(() => { if (mounted) setLoading(false); });
+    return () => { mounted = false; };
   }, []);
 
-  // Trigger counters once the section scrolls into view
-  useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setActive(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.3 },
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  const items = [
-    { key: "quotes", label: "Quotes in the library" },
-    { key: "users", label: "Readers & writers" },
-    { key: "authors", label: "Authors cited" },
-    { key: "saves", label: "Bookmarks saved" },
-    { key: "tags", label: "Unique tags" },
-    { key: "quotesThisWeek", label: "Added this week" },
-  ];
+  if (!loading && failed) return null;
+  if (!loading && quotes.length === 0) return null;
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative px-6 md:px-12 py-24 bg-gray-900 text-white overflow-hidden"
-    >
+    <section data-dark className="relative px-6 md:px-12 py-24 bg-gray-900 text-white overflow-hidden">
       {/* Decorative gradient orbs */}
       <div className="absolute -top-32 -left-32 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative max-w-6xl mx-auto">
-        <Reveal className="text-center mb-16">
-          <span className="text-xs font-semibold tracking-widest text-white/50 uppercase mb-4 block">
-            The numbers
+        <Reveal className="text-center mb-12">
+          <span className="text-xs font-semibold tracking-widest text-white/70 uppercase mb-4 block">
+            Trending This Week
           </span>
           <h2 className="text-3xl md:text-4xl font-bold mb-3">
-            A growing library, built by its readers
+            The quotes people keep coming back to
           </h2>
-          <p className="text-white/60 text-sm max-w-xl mx-auto">
-            Every counter below reflects live data from the Quoted community.
+          <p className="text-white/70 text-sm max-w-xl mx-auto">
+            Ranked by how many readers have saved them to their collection.
           </p>
         </Reveal>
 
-        <motion.div
-          variants={staggerContainer}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: "-80px" }}
-          className="grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-12"
-        >
-          {items.map((item) => (
-            <motion.div
-              key={item.key}
-              variants={staggerItem}
-              className="text-center"
-            >
-              <div className="text-4xl md:text-5xl font-bold tracking-tight mb-2 tabular-nums">
-                <AnimatedNumber
-                  value={stats?.[item.key] ?? 0}
-                  active={active && stats != null}
-                />
-              </div>
-              <div className="text-xs md:text-sm text-white/60 uppercase tracking-wider">
-                {item.label}
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(5)].map((_, i) => (
+              <div
+                key={i}
+                className="bg-white/5 border border-white/10 rounded-2xl p-6 animate-pulse h-40"
+              />
+            ))}
+          </div>
+        ) : (
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: "-80px" }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {quotes.map((quote, i) => (
+              <motion.div
+                key={quote._id}
+                variants={staggerItem}
+                className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col gap-4 hover:bg-white/10 transition-colors"
+              >
+                {/* Rank badge */}
+                <span className="text-xs font-semibold text-indigo-400 tracking-widest uppercase">
+                  #{i + 1} Trending
+                </span>
+
+
+                <blockquote className="text-sm md:text-base leading-relaxed text-white flex-1">
+                  "{quote.text}"
+                </blockquote>
+
+                <div className="flex items-center justify-between gap-2 mt-auto">
+                  {quote.author ? (
+                    <span className="text-xs text-white/70">— {quote.author}</span>
+                  ) : (
+                    <span />
+                  )}
+                  <span className="text-xs text-white/70 flex items-center gap-1 shrink-0">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      className="w-3.5 h-3.5 text-indigo-400"
+                    >
+                      <path d="M10.75 2.75a.75.75 0 0 0-1.5 0v8.614L6.295 8.235a.75.75 0 1 0-1.09 1.03l4.25 4.5a.75.75 0 0 0 1.09 0l4.25-4.5a.75.75 0 0 0-1.09-1.03l-2.955 3.129V2.75Z" />
+                      <path d="M3.5 12.75a.75.75 0 0 0-1.5 0v2.5A2.75 2.75 0 0 0 4.75 18h10.5A2.75 2.75 0 0 0 18 15.25v-2.5a.75.75 0 0 0-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5Z" />
+                    </svg>
+                    {quote.saveCount} saved
+                  </span>
+                </div>
+
+                
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
       </div>
     </section>
   );
@@ -1247,12 +1218,73 @@ function InlineRegister() {
   );
 }
 
+// ── Sticky navbar ──────────────────────────────────────────────────────────
+// Uses elementsFromPoint to hit-test what's behind the nav on every scroll,
+// then walks up the DOM to find a data-dark marker. Handles any number of
+// dark sections without hardcoding positions.
+function StickyNav() {
+  const [overDark, setOverDark] = useState(true);
+  const headerRef = useRef(null);
+
+  useEffect(() => {
+    function check() {
+      const navH = headerRef.current?.offsetHeight ?? 64;
+      const stack = document.elementsFromPoint(window.innerWidth / 2, navH / 2);
+      const header = headerRef.current;
+      const behind = stack.find(el => el !== header && !header?.contains(el));
+      let node = behind ?? null;
+      let dark = false;
+      while (node && node !== document.documentElement) {
+        if (node.dataset?.dark !== undefined) { dark = true; break; }
+        node = node.parentElement;
+      }
+      setOverDark(dark);
+    }
+    check();
+    window.addEventListener("scroll", check, { passive: true });
+    return () => window.removeEventListener("scroll", check);
+  }, []);
+
+  return (
+    <motion.header
+      ref={headerRef}
+      initial={{ opacity: 0, y: -12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 py-5 transition-all duration-1000 border-b ${
+        overDark
+          ? "bg-transparent border-transparent"
+          : "bg-white/80 backdrop-blur-md border-gray-200"
+      }`}
+    >
+      <span className={`text-xl font-bold tracking-tight select-none transition-colors duration-300 ${overDark ? "text-white drop-shadow" : "text-gray-900"}`}>
+        Quoted
+      </span>
+      <div className="flex items-center gap-3">
+        <Link
+          to="/login"
+          className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 ${
+            overDark
+              ? "text-white border border-white/50 hover:bg-white/10 hover:border-white"
+              : "text-gray-900 border border-gray-300 hover:bg-gray-100"
+          }`}
+        >
+          Log in
+        </Link>
+      </div>
+    </motion.header>
+  );
+}
+
 // ── Main homepage ───────────────────────────────────────────────────────────
 export default function Home() {
   const [activeFeature, setActiveFeature] = useState(null);
 
   return (
     <div className="min-h-screen bg-white">
+      {/* ── Sticky nav: transparent over hero, frosted on scroll ──── */}
+      <StickyNav />
+
       {/* ── Hero: scroll-linked parallax ─────────────────────────── */}
       <Hero />
 
@@ -1403,7 +1435,7 @@ export default function Home() {
       </section>
 
       {/* ── Live stats with animated counters ────────────────────── */}
-      <StatsSection />
+      <TrendingSection />
 
       {/* ── Inline register ──────────────────────────────────────── */}
       <InlineRegister />

@@ -13,7 +13,7 @@
 html,
 body {
   font-family: "Lexend", sans-serif !important;
-  font-weight: 250 !important;
+  font-weight: 400 !important;
 }
 
 h1,
@@ -32,7 +32,7 @@ select,
 label,
 li {
   font-family: "Lexend", sans-serif !important;
-  font-weight: 250 !important;
+  font-weight: 400 !important;
 }
 
 /* 2. Apply it to the body correctly */
