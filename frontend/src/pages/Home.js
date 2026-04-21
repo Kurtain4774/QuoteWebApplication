@@ -492,7 +492,7 @@ function Hero() {
       {/* Bottom CTAs — fade + drift on scroll */}
       <motion.div
         style={{ opacity: contentOpacity, y: contentY }}
-        className="absolute bottom-0 left-0 right-0 z-20 flex flex-col items-center pb-16 md:pb-20"
+        className="absolute bottom-0 left-0 right-0 z-20 flex flex-col items-center pb-28 md:pb-20"
       >
         <motion.div
           initial={{ opacity: 0, y: 20 }}

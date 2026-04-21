@@ -10,39 +10,35 @@ let cache = { data: null, expires: 0 };
 const TTL_MS = 60 * 1000;
 
 router.get('/', async (req, res) => {
-  try {
-    if (cache.data && Date.now() < cache.expires) {
-      return res.json(cache.data);
-    }
-
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-
-    const [quotes, users, authors, tags, savesAgg, recent] = await Promise.all([
-      Quote.countDocuments(),
-      User.countDocuments(),
-      Quote.distinct('author', { author: { $ne: '' } }),
-      Quote.distinct('tags'),
-      Quote.aggregate([
-        { $project: { count: { $size: { $ifNull: ['$savedBy', []] } } } },
-        { $group: { _id: null, total: { $sum: '$count' } } },
-      ]),
-      Quote.countDocuments({ createdAt: { $gte: sevenDaysAgo } }),
-    ]);
-
-    const data = {
-      quotes,
-      users,
-      authors: authors.length,
-      tags: tags.length,
-      saves: savesAgg[0]?.total || 0,
-      quotesThisWeek: recent,
-    };
-
-    cache = { data, expires: Date.now() + TTL_MS };
-    res.json(data);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to load stats' });
+  if (cache.data && Date.now() < cache.expires) {
+    return res.json(cache.data);
   }
+
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+  const [quotes, users, authors, tags, savesAgg, recent] = await Promise.all([
+    Quote.countDocuments(),
+    User.countDocuments(),
+    Quote.distinct('author', { author: { $ne: '' } }),
+    Quote.distinct('tags'),
+    Quote.aggregate([
+      { $project: { count: { $size: { $ifNull: ['$savedBy', []] } } } },
+      { $group: { _id: null, total: { $sum: '$count' } } },
+    ]),
+    Quote.countDocuments({ createdAt: { $gte: sevenDaysAgo } }),
+  ]);
+
+  const data = {
+    quotes,
+    users,
+    authors: authors.length,
+    tags: tags.length,
+    saves: savesAgg[0]?.total || 0,
+    quotesThisWeek: recent,
+  };
+
+  cache = { data, expires: Date.now() + TTL_MS };
+  res.json(data);
 });
 
 module.exports = router;
